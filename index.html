@@ -1,146 +1,473 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <title>血月低语 - 沉浸式生存指南</title>
     <style>
-         /* 新增居中容器样式 */
-        .container {
-            width: 90%;
-            margin: 0 auto;
-            max-width: 1200px;
+        :root {
+            --blur-intensity: 15px;
+            --acrylic-opacity: 0.4;
         }
 
-        .data-table {
+        /* 动态背景 */
+        body {
+            min-height: 100vh;
+            background: linear-gradient(45deg, #5a0000, #9a1a1a, #1a002a);
+            background-size: 400% 400%;
+            animation: gradientFlow 20s ease infinite;
+            margin: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* 亚克力效果容器 */
+        .acrylic {
+            background: rgba(40, 40, 40, var(--acrylic-opacity)) !important;
+            backdrop-filter: blur(var(--blur-intensity)) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 开场动画 */
+        .intro-screen {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+        }
+        .intro-title {
+            font-size: 4em;
+            background: linear-gradient(45deg, #ff4d4d, #ff6666);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+        .intro-screen {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center;     /* 垂直居中 */
+        }
+
+        .intro-content {
+            display: flex;
+            flex-direction: column;  /* 垂直排列 */
+            align-items: center;     /* 子元素水平居中 */
+            gap: 2rem;              /* 元素间距 */
+        }
+        #startButton {
+            padding: 1rem 3rem;
+            font-size: 1.2em;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            /* 添加过渡动画 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #startButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.3);
+        }
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255,77,77,0.5); }
+            50% { text-shadow: 0 0 40px rgba(255,77,77,0.8); }
+        }
+
+        /* 手册主体 */
+        .manual-container {
+            display: none;
+            max-width: 1000px;
+            margin: 2rem auto;
+            border-radius: 15px;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .manual-container.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* 章节动画 */
+        .chapter {
+            display: none;
+            padding: 2rem;
+            min-height: 60vh;
+            transform: translateX(50px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .chapter.active {
+            display: block;
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* 动态导航按钮 */
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-buttons button {
+            background: rgba(255,77,77,0.2);
+            border: 1px solid rgba(255,77,77,0.3);
+            color: #ff9999;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-buttons button:hover {
+            background: rgba(255,77,77,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,77,77,0.2);
+        }
+
+        /* 内容特效 */
+        h2 {
+            font-size: 2.2em;
+            margin: 2rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 80%;
+            background: linear-gradient(to bottom, #ff4d4d, #660000);
+            border-radius: 3px;
+        }
+
+        .warning {
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #ff4d4d;
+            background: rgba(255,77,77,0.05);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+        .warning::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg,
+                rgba(255,77,77,0.1) 0%,
+                rgba(255,77,77,0) 50%,
+                rgba(255,77,77,0.1) 100%
+            );
+            pointer-events: none;
+        }
+
+        /* 表格动效 */
+        .creature-table {
+            width: 100%;
             border-collapse: collapse;
-            margin: 20px auto; /* 修改为自动居中 */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            width: 100%; /* 添加宽度定义 */
+            margin: 2rem 0;
+            background: rgba(30,30,30,0.3);
         }
-        .data-table th {
-            background-color: #2c3e50;
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
+        .creature-table th,
+        .creature-table td {
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(255,77,77,0.1);
+            transition: background 0.3s ease;
         }
-        
-        .data-table td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #ecf0f1;
+        .creature-table tr:hover td {
+            background: rgba(255,77,77,0.05);
         }
-        
-        .platform-modrinth {
-            color: #3498db;
-            font-weight: 600;
+
+        /* 月亮卡片特效 */
+        .moon-card {
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 12px;
+            background: rgba(42,31,51,0.3);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .platform-bbsmc {
-            color: #e74c3c;
-            font-weight: 600;
+        .moon-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(107,70,193,0.2),
+                rgba(107,70,193,0.4),
+                rgba(107,70,193,0.2)
+            );
+            animation: rotate 20s linear infinite;
         }
-        
-        .highlight {
-            background-color: #f9f9f9;
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+        .run-animation {
+            /* 基础样式 */
+            color: #8B0000; /* 深红色 */
+            font-weight: 900; /* 超粗体 */
+            font-style: italic; /* 斜体 */
+            font-size: calc(1rem + 1vw); /* 动态字体大小 */
+            
+            /* 尺寸控制 */
+            width: 10vmin;
+            height: 10vmin;
+            min-width: 50px;
+            min-height: 50px;
+            
+            /* 动画配置 */
+            animation: pulse 1.5s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            25% {
+                transform: scale(1.8);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(0.7);
+                opacity: 0.8;
+            }
+            75% {
+                transform: scale(1.3);
+                opacity: 0.95;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 开场动画 -->
+    <div class="intro-screen acrylic">
+        <h1 class="intro-title">新手生存手册</h1>
+        
+        <button id="startButton" class="acrylic" style="
+            padding: 1rem 3rem;
+            font-size: 1.2em;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        ">开始探索</button>
+    </div>
 
-<!-- 数据总览表 -->
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>指标</th>
-            <th>Modrinth平台</th>
-            <th>BBSMC平台</th>
-            <th>总计</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>下载量</td>
-            <td class="platform-modrinth">35</td>
-            <td class="platform-bbsmc">29</td>
-            <td class="highlight">64次</td>
-        </tr>
-        <tr>
-            <td>浏览量</td>
-            <td class="platform-modrinth">2,902</td>
-            <td class="platform-bbsmc">137</td>
-            <td class="highlight">3,039次</td>
-        </tr>
-        <tr>
-            <td>下载转化率</td>
-            <td>1.21%</td>
-            <td>21.17%</td>
-            <td class="highlight">综合2.11%</td>
-        </tr>
-        <tr>
-            <td>社群增长</td>
-            <td>-</td>
-            <td>+1</td>
-            <td class="highlight">QQ群+1成员</td>
-        </tr>
-    </tbody>
-</table>
+    <!-- 手册内容 -->
+    <div class="manual-container acrylic">
+        <div class="nav-buttons acrylic">
+            <button onclick="showChapter(1)">生存守则</button>
+            <button onclick="showChapter(2)">伪人识别</button>
+            <button onclick="showChapter(3)">月亮周期</button>
+            <button onclick="showChapter(4)">特殊实体</button>
+            <button onclick="showChapter(5)">多人协作</button>
+            <button onclick="showChapter(6)">基地防御</button>
+        </div>
 
-<!-- 平台价值矩阵表 -->
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>评估维度</th>
-            <th>Modrinth平台</th>
-            <th>BBSMC平台</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>核心优势</td>
-            <td>泛用户曝光能力</td>
-            <td>精准用户转化能力</td>
-        </tr>
-        <tr>
-            <td>关键短板</td>
-            <td>流量价值利用率低</td>
-            <td>流量基数天花板明显</td>
-        </tr>
-        <tr>
-            <td>运营定位</td>
-            <td>品牌传播主阵地</td>
-            <td>核心用户留存池</td>
-        </tr>
-    </tbody>
-</table>
+        <!-- 各章节内容与之前保持一致，此处省略重复内容 -->
+        <!-- 第一章 -->
+              <div class="chapter active" id="chapter1">
+                  <h2>▶ 生存核心要素</h2>
+                  <div class="warning">
+                      <strong>⚠ 健康警示：</strong>心脏病/心理疾病患者请勿游玩
+                  </div>
+                  <h3>🌿 理智维持指南</h3>
+                  <ul>
+                      <li>花环制作：任意8朵花环绕制作</li>
+                      <li>有效行为：种植作物(+1/min)、与正常村民交易(+5/次)</li>
+                      <li>危险行为：夜间战斗(-3/sec)、直视HIM(-10/次)</li>
+                  </ul>
+              </div>
 
-<!-- 数据校验表 -->
-<table class="data-table">
-    <caption>原始数据校验表</caption>
-    <thead>
-        <tr>
-            <th>数据源</th>
-            <th>下载量</th>
-            <th>浏览量</th>
-            <th>数据有效性</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Modrinth</td>
-            <td>35</td>
-            <td>2,902</td>
-            <td>经IP去重</td>
-        </tr>
-        <tr>
-            <td>BBSMC</td>
-            <td>29</td>
-            <td>137</td>
-            <td>人工审核</td>
-        </tr>
-        <tr class="highlight">
-            <td colspan="3">数据置信度</td>
-            <td>92.6% | 89.3%</td>
-        </tr>
-    </tbody>
-</table>
+              <!-- 第二章 -->
+              <div class="chapter" id="chapter2">
+                  <h2>🔍 伪人鉴别手册</h2>
+                  <table class="creature-table">
+                      <tr>
+                          <th>伪装形态</th>
+                          <th>暴露特征</th>
+                          <th>清除方式</th>
+                      </tr>
+                      <tr>
+                          <td>铁傀儡</td>
+                          <td>全身破损纹理</td>
+                          <td>不建议直接尝试击杀，会导致伪人直接现形；可尝试远程武器或呼叫队友</td>
+                      </tr>
+                      <tr>
+                          <td>村民</td>
+                          <td>由于加了凡家物语，所以非凡家物语的普通原版村民即伪人</td>
+                          <td>不建议直接尝试击杀，会导致伪人直接现形；可尝试远程武器或呼叫队友</td>
+                      </tr>
+                  </table>
+                  <div class="warning">
+                      ❗ 发现伪人时：
+                      <ol>
+                          <li>立即标记坐标</li>
+                          <li>确保远离至少半径5格内</li>
+                          <li>不建议直接尝试击杀，会导致伪人直接现形；可尝试远程武器或呼叫队友，如果没有队友，请直接：</li>
+                          <!-- 在任意位置插入 -->
+                          <div class="run-animation">RUN!!</div>
+                      </ol>
+                  </div>
+              </div>
 
+              <!-- 第三章 -->
+              <div class="chapter" id="chapter3">
+                  <h2>🌙 月亮周期档案</h2>
+                  <div class="moon-card">
+                      <h3>🌕 血月事件</h3>
+                      <ul>
+                          <li>持续时间：整夜（无法跳过）</li>
+                          <li>怪物生成率+300%</li>
+                          <li>理智消耗×2</li>
+                      </ul>
+                  </div>
+                  <div class="moon-card">
+                      <h3>🌾 丰收月</h3>
+                      <ul>
+                          <li>作物成熟时间-50%</li>
+                          <li>破坏未成熟作物可收获</li>
+                      </ul>
+                  </div>
+                  <div class="moon-card">
+                      <h3>🔵 蓝月</h3>
+                      <ul>
+                          <li>战利品品质+2级</li>
+                          <li>稀有物品掉率+15%</li>
+                      </ul>
+                  </div>
+              </div>
+
+              <!-- 第四章 -->
+              <div class="chapter" id="chapter4">
+                  <h2>高危实体档案</h2>
+                  <div class="warning">
+                      <h3>HIM行为模式</h3>
+                      <ul>
+                          <li>生成红石火把隧道（每30min）</li>
+                          <li>偷换玩家火把（概率12%）</li>
+                          <li>转身杀机制：保持面朝正前方！</li>
+                      </ul>
+                  </div>
+                  <div class="warning">
+                      <h3>雾中人应对协议</h3>
+                      <ol>
+                          <li>生成间隔：1-2游戏日</li>
+                          <li>必杀条件：背对超过10秒</li>
+                          <li>弱点：火把范围内移速-30%</li>
+                      </ol>
+                  </div>
+              </div>
+
+              <!-- 第五章 -->
+              <div class="chapter" id="chapter5">
+                  <h2>👥 多人协作指南</h2>
+                  <div class="warning">
+                      <h3>推荐分工</h3>
+                      <ul>
+                          <li>侦察兵：夜视药水+望远镜</li>
+                          <li>建造师：黑曜石+铁栅栏+安全工艺</li>
+                          <li>药剂师：制作药水</li>
+                          <li>指挥：信号弹调度</li>
+                          <li>武装团队：执行高塔远程攻击或防御</li>
+                      </ul>
+                  </div>
+              </div>
+
+              <!-- 第六章 -->
+              <div class="chapter" id="chapter6">
+                  <h2>🏰 基地防御系统</h2>
+                  <div class="security-card">
+                      <h3>防御敲门人</h3>
+                      <ul>
+                          <li>使用铁活板门+压力板代替木门</li>
+                          <li>门前3格放置侦测器+铃铛</li>
+                          <li>每周更换入口位置</li>
+                      </ul>
+                  </div>
+                  <table class="creature-table">
+                      <tr>
+                          <th>防御设施</th>
+                          <th>材料配方</th>
+                          <th>效果范围</th>
+                      </tr>
+                      <tr>
+                          <td>激光栅栏</td>
+                          <td>红石+玻璃+铁锭</td>
+                          <td>水平8格</td>
+                      </tr>
+                      <tr>
+                          <td>智能炮塔</td>
+                          <td>发射器+石英</td>
+                          <td>120度扇形</td>
+                      </tr>
+                  </table>
+              </div>
+          </div>
+    </div>
+
+    <script>
+        // 开场控制
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.querySelector('.intro-screen').style.opacity = 0;
+            setTimeout(() => {
+                document.querySelector('.intro-screen').remove();
+                document.querySelector('.manual-container').style.display = 'block';
+                setTimeout(() => {
+                    document.querySelector('.manual-container').classList.add('active');
+                }, 50);
+            }, 600);
+            showChapter(1);
+        });
+
+        // 章节切换
+        function showChapter(chapterNum) {
+            document.querySelectorAll('.chapter').forEach(c => {
+                c.classList.remove('active');
+                c.style.pointerEvents = 'none';
+            });
+            setTimeout(() => {
+                document.getElementById(`chapter${chapterNum}`).classList.add('active');
+            }, 50);
+        }
+
+        // 视差效果
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.body.style.backgroundPosition = `0% ${scrolled * 0.5}px`;
+        });
+    </script>
 </body>
 </html>

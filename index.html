@@ -437,7 +437,9 @@
               </div>
           </div>
     </div>
-
+    <div class="chapter" id="chapter7">
+<div>访问人数: <span id="counter">加载中...</span></div>
+    </div>
     <script>
         // 开场控制
         document.getElementById('startButton').addEventListener('click', () => {
@@ -469,5 +471,24 @@
             document.body.style.backgroundPosition = `0% ${scrolled * 0.5}px`;
         });
     </script>
-</body>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 尝试从localStorage获取计数
+    let counter = localStorage.getItem('visitorCounter') || 0;
+    let lastIP = localStorage.getItem('lastVisitorIP');
+    
+    // 使用第三方API获取简化版IP（免费方案）
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+            if(data.ip !== lastIP) {
+                counter++;
+                localStorage.setItem('visitorCounter', counter);
+                localStorage.setItem('lastVisitorIP', data.ip);
+            }
+            document.getElementById('counter').innerText = counter;
+        });
+});
+</script>
+</body>  
 </html>
